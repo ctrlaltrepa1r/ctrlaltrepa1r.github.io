@@ -1,0 +1,1342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CTRL+ALT+REPAIR — Old-School IT Support</title>
+<meta name="description" id="metaDesc" content="Old-school IT support: OS reinstalls, troubleshooting, hardware repair, upgrades and de-googled privacy phones with GrapheneOS or CalyxOS.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect width='16' height='16' fill='%23008080'/><rect x='2' y='2' width='12' height='9' fill='%23c0c0c0'/><rect x='4' y='4' width='8' height='5' fill='%23000'/><rect x='5' y='6' width='4' height='1' fill='%2333ff55'/><rect x='5' y='12' width='6' height='2' fill='%23c0c0c0'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   CTRL+ALT+REPAIR — retro Win95 desktop + CRT terminal
+   ============================================================ */
+:root{
+  --desktop:#008080;
+  --desktop-d:#007474;
+  --face:#c0c0c0;
+  --face-d:#808080;
+  --black:#0a0a0a;
+  --light:#dfdfdf;
+  --white:#ffffff;
+  --title-a:#000080;
+  --title-b:#1084d0;
+  --navy:#000080;
+  --term-bg:#041004;
+  --term-green:#33ff55;
+  --term-dim:#1fae3c;
+  --amber:#ffb000;
+  --red:#cc2200;
+  --ui-font:Tahoma,Verdana,"MS Sans Serif",Geneva,sans-serif;
+  --mono:"VT323","Courier New",monospace;
+  --code:"Courier New",Courier,monospace;
+  --taskbar-h:52px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+body{
+  font-family:var(--ui-font);
+  font-size:17.5px;
+  color:var(--black);
+  background-color:var(--desktop);
+  background-image:conic-gradient(var(--desktop-d) 25%, var(--desktop) 25% 50%, var(--desktop-d) 50% 75%, var(--desktop) 75%);
+  background-size:5px 5px;
+  min-height:100vh;
+}
+::selection{background:var(--navy);color:#fff}
+img,svg{display:block}
+a{color:var(--navy)}
+button{font-family:var(--ui-font);font-size:16px;cursor:pointer}
+
+/* ---------- Win95 bevels ---------- */
+.bevel-out{
+  background:var(--face);
+  box-shadow:inset -1px -1px 0 var(--black), inset 1px 1px 0 var(--white),
+             inset -2px -2px 0 var(--face-d), inset 2px 2px 0 var(--light);
+}
+.bevel-in{
+  background:var(--face);
+  box-shadow:inset -1px -1px 0 var(--white), inset 1px 1px 0 var(--black),
+             inset -2px -2px 0 var(--light), inset 2px 2px 0 var(--face-d);
+}
+.field-in{
+  background:#fff;
+  box-shadow:inset -1px -1px 0 var(--white), inset 1px 1px 0 var(--face-d),
+             inset -2px -2px 0 var(--light), inset 2px 2px 0 var(--black);
+}
+.btn{
+  display:inline-flex;align-items:center;gap:9px;
+  padding:9px 20px;border:none;color:var(--black);
+  background:var(--face);text-decoration:none;
+  box-shadow:inset -1px -1px 0 var(--black), inset 1px 1px 0 var(--white),
+             inset -2px -2px 0 var(--face-d), inset 2px 2px 0 var(--light);
+}
+.btn:active{
+  box-shadow:inset -1px -1px 0 var(--white), inset 1px 1px 0 var(--black),
+             inset -2px -2px 0 var(--light), inset 2px 2px 0 var(--face-d);
+  padding-top:10px;padding-bottom:8px;
+}
+.btn.primary{font-weight:bold}
+.btn:focus-visible, button:focus-visible, a:focus-visible{
+  outline:1px dotted var(--black);outline-offset:-5px;
+}
+.term a:focus-visible{outline:1px dotted var(--term-green)}
+
+/* ---------- Windows ---------- */
+main{
+  max-width:1200px;margin:0 auto;
+  padding:32px 16px calc(var(--taskbar-h) + 42px);
+  display:flex;flex-direction:column;gap:38px;
+}
+.window{
+  background:var(--face);
+  box-shadow:inset -1px -1px 0 var(--black), inset 1px 1px 0 var(--light),
+             inset -2px -2px 0 var(--face-d), inset 2px 2px 0 var(--white),
+             4px 4px 0 rgba(0,0,0,.28);
+  padding:5px;
+  scroll-margin-top:22px;
+}
+.titlebar{
+  display:flex;align-items:center;gap:9px;
+  background:linear-gradient(90deg,var(--title-a),var(--title-b));
+  color:#fff;padding:5px 6px;user-select:none;
+}
+.titlebar .t-icon{flex:0 0 auto}
+.titlebar h1,.titlebar h2{
+  font-size:16px;font-weight:bold;letter-spacing:.2px;
+  flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.win-controls{display:flex;gap:2px}
+.win-controls button{
+  width:25px;height:22px;display:grid;place-items:center;padding:0;
+  background:var(--face);border:none;
+  box-shadow:inset -1px -1px 0 var(--black), inset 1px 1px 0 var(--white),
+             inset -2px -2px 0 var(--face-d), inset 2px 2px 0 var(--light);
+}
+.win-controls button:active{
+  box-shadow:inset 1px 1px 0 var(--black), inset -1px -1px 0 var(--white);
+}
+.win-controls svg{width:12px;height:12px}
+.win-body{padding:18px;background:var(--face)}
+
+.menubar{
+  display:flex;gap:2px;padding:4px 5px 5px;font-size:16px;color:var(--black);
+  border-bottom:1px solid var(--face-d);box-shadow:0 1px 0 var(--white);
+  user-select:none;
+}
+.menubar span{padding:3px 9px}
+.menubar span:hover{background:var(--navy);color:#fff}
+.menubar u{text-decoration:underline}
+
+/* offsets so the pile of windows feels like a real desktop */
+.w-hero{width:100%}
+.w-services{width:100%}
+.w-phones{width:min(100%,1080px);align-self:flex-end}
+.w-readme{width:min(100%,900px);align-self:flex-start}
+.w-contact{width:min(100%,1010px);align-self:center}
+
+/* ---------- Terminal (hero) ---------- */
+.term{
+  background:
+    repeating-linear-gradient(0deg, rgba(0,0,0,.22) 0 1px, transparent 1px 3px),
+    var(--term-bg);
+  color:var(--term-green);
+  font-family:var(--mono);
+  font-size:clamp(21px,3vw,27px);
+  line-height:1.32;
+  padding:27px 25px 32px;
+  box-shadow:inset -1px -1px 0 var(--white), inset 1px 1px 0 var(--black),
+             inset -2px -2px 0 var(--light), inset 2px 2px 0 var(--face-d);
+  text-shadow:0 0 7px rgba(51,255,85,.4);
+  overflow:hidden;
+}
+.term .dim{color:var(--term-dim)}
+.term .amber{color:var(--amber);text-shadow:0 0 7px rgba(255,176,0,.4)}
+.term .ok{color:var(--term-green);font-weight:bold}
+.term pre{font-family:inherit;white-space:pre;overflow-x:auto}
+.hero-grid{display:flex;gap:32px;align-items:flex-start;flex-wrap:wrap}
+.hero-copy{flex:1 1 470px;min-width:0}
+.hero-art{flex:0 0 auto;font-size:.85em;line-height:1.15}
+.hero-title{
+  font-family:var(--mono);
+  font-size:clamp(42px,7.5vw,72px);
+  line-height:.95;letter-spacing:1px;
+  margin:6px 0 4px;font-weight:normal;
+}
+.hero-sub{font-size:clamp(22px,3.2vw,30px);margin-bottom:20px}
+.diag{margin:17px 0 22px;display:flex;flex-direction:column;gap:2px}
+.diag-row{display:flex;align-items:baseline;gap:8px;white-space:nowrap;min-width:0}
+.diag-row .lbl{flex:0 1 auto;overflow:hidden;text-overflow:ellipsis}
+.diag-row .dots{flex:1 1 14px;overflow:hidden;color:var(--term-dim)}
+.diag-row .dots::before{content:"........................................................................"}
+.diag-row .stat{flex:0 0 auto}
+.caret::after{
+  content:"▋";margin-left:2px;
+  animation:blink 1.06s steps(1) infinite;
+}
+@keyframes blink{50%{opacity:0}}
+.hero-ctas{display:flex;gap:15px;flex-wrap:wrap;margin-top:22px}
+.hero-ctas .btn{font-size:17px}
+
+/* ---------- Explorer / services ---------- */
+.addressbar{
+  display:flex;align-items:center;gap:8px;
+  padding:6px 8px;border-bottom:1px solid var(--face-d);
+  box-shadow:0 1px 0 var(--white);font-size:16px;
+}
+.addressbar .path{
+  flex:1;padding:5px 10px;font-family:var(--code);font-size:16px;
+}
+.filelist{padding:8px 5px}
+.filerow{
+  display:grid;grid-template-columns:290px 1fr 185px;gap:8px 17px;
+  align-items:center;padding:10px 13px;
+  border-bottom:1px dotted #9a9a9a;
+}
+.filerow:last-child{border-bottom:none}
+.filerow:hover{background:var(--navy);color:#fff}
+.filerow:hover .fname,.filerow:hover .fprice{color:#fff}
+.filerow:hover .fdesc{color:#e8e8ff}
+.fname{
+  display:flex;align-items:center;gap:11px;
+  font-family:var(--code);font-weight:bold;font-size:16px;color:var(--black);
+  word-break:break-all;
+}
+.fname svg{flex:0 0 auto}
+.fdesc{font-size:16px;color:#222;line-height:1.45}
+.fprice{
+  text-align:right;font-weight:bold;color:var(--navy);
+  font-size:16px;white-space:nowrap;
+}
+.fprice small{display:block;font-weight:normal;color:#555;font-size:14px}
+.filerow:hover .fprice small{color:#cfcfe8}
+.statusbar{
+  display:flex;gap:5px;margin-top:2px;font-size:15px;flex-wrap:wrap;
+}
+.statusbar > div{
+  padding:5px 11px;flex:0 0 auto;
+  box-shadow:inset 1px 1px 0 var(--face-d), inset -1px -1px 0 var(--white);
+}
+.statusbar > div:first-child{flex:1 1 auto}
+.blink{animation:blink 1s steps(1) infinite;color:var(--red);font-weight:bold}
+
+/* ---------- Phones window ---------- */
+.phones-grid{display:flex;gap:27px;flex-wrap:wrap}
+.phones-copy{flex:1 1 425px;min-width:0}
+.phones-copy h3{font-size:17px;margin:17px 0 10px}
+.phones-copy p{line-height:1.55;margin-bottom:12px}
+.checklist{list-style:none;margin:4px 0 6px}
+.checklist li{
+  display:flex;gap:11px;align-items:flex-start;
+  padding:5px 0;line-height:1.45;
+}
+.chk{
+  flex:0 0 auto;width:19px;height:19px;margin-top:3px;background:#fff;
+  box-shadow:inset -1px -1px 0 var(--white), inset 1px 1px 0 var(--face-d),
+             inset -2px -2px 0 var(--light), inset 2px 2px 0 var(--black);
+  display:grid;place-items:center;
+  font-size:15px;font-weight:bold;color:var(--black);line-height:1;
+}
+.offers{flex:1 1 375px;display:flex;flex-direction:column;gap:15px}
+.offer{
+  padding:15px 18px;
+  box-shadow:inset -1px -1px 0 var(--white), inset 1px 1px 0 var(--black),
+             inset -2px -2px 0 var(--light), inset 2px 2px 0 var(--face-d);
+  background:var(--face);
+}
+.offer .o-head{display:flex;align-items:baseline;gap:11px;flex-wrap:wrap}
+.radio{
+  width:16px;height:16px;border-radius:50%;background:#fff;flex:0 0 auto;
+  box-shadow:inset 1px 1px 0 var(--face-d), inset -1px -1px 0 var(--white),
+             inset 2px 2px 0 var(--black);
+  position:relative;top:1px;
+}
+.offer.best .radio::after{
+  content:"";position:absolute;inset:5px;border-radius:50%;background:var(--black);
+}
+.offer strong{font-size:17px}
+.offer .o-price{margin-left:auto;font-weight:bold;color:var(--navy);white-space:nowrap}
+.offer p{font-size:15.5px;color:#333;margin-top:8px;line-height:1.5}
+.tagchip{
+  font-size:12px;font-weight:bold;letter-spacing:.5px;
+  background:var(--navy);color:#fff;padding:3px 8px;
+}
+.compat{font-size:15px;color:#444;margin-top:12px;line-height:1.5}
+
+/* ---------- README / notepad ---------- */
+.notepad{
+  background:#fff;padding:20px 22px;min-height:250px;
+  box-shadow:inset -1px -1px 0 var(--white), inset 1px 1px 0 var(--face-d),
+             inset -2px -2px 0 var(--light), inset 2px 2px 0 var(--black);
+  overflow-x:auto;
+}
+.notepad pre{
+  font-family:var(--code);font-size:16px;line-height:1.6;color:#111;
+  white-space:pre;min-width:0;
+}
+
+/* ---------- Contact ---------- */
+.contact-grid{display:flex;gap:18px;flex-wrap:wrap}
+fieldset{
+  flex:1 1 350px;border:1px solid;padding:17px 17px 20px;
+  border-color:var(--face-d) var(--white) var(--white) var(--face-d);
+  box-shadow:1px 1px 0 var(--white) inset;
+}
+legend{font-size:15px;font-weight:bold;padding:0 6px}
+.c-row{display:flex;gap:12px;align-items:center;padding:8px 0;line-height:1.4}
+.c-row svg{flex:0 0 auto}
+.c-row a{font-weight:bold}
+.contact-ctas{display:flex;gap:15px;flex-wrap:wrap;margin-top:20px}
+.small-note{font-size:15px;color:#444;margin-top:15px}
+
+/* ---------- Footer strip ---------- */
+.site-footer{
+  text-align:center;color:#dff5f5;font-size:15px;line-height:1.7;
+  text-shadow:1px 1px 0 rgba(0,0,0,.45);
+  display:flex;flex-direction:column;gap:10px;align-items:center;
+}
+.counter{
+  display:inline-flex;gap:4px;padding:6px 9px;background:#111;
+  box-shadow:inset 1px 1px 0 #000, 0 0 0 2px var(--face);
+}
+.counter span{
+  font-family:var(--mono);font-size:24px;line-height:1;
+  color:var(--term-green);background:#032003;padding:3px 6px;
+  text-shadow:0 0 6px rgba(51,255,85,.6);
+}
+.counter-label{font-size:14px}
+
+/* ---------- Desktop icons ---------- */
+.desk-icons{
+  position:fixed;left:16px;top:24px;z-index:5;
+  display:flex;flex-direction:column;gap:25px;
+}
+.desk-icons a{
+  width:95px;display:flex;flex-direction:column;align-items:center;gap:6px;
+  text-decoration:none;color:#fff;font-size:14px;text-align:center;
+  text-shadow:1px 1px 0 #000;
+}
+.desk-icons a:hover span,.desk-icons a:focus-visible span{
+  background:var(--navy);outline:1px dotted #fff;
+}
+.desk-icons span{padding:1px 4px;line-height:1.3}
+@media (max-width:1520px){.desk-icons{display:none}}
+
+/* ---------- Taskbar ---------- */
+.taskbar{
+  position:fixed;left:0;right:0;bottom:0;height:var(--taskbar-h);z-index:60;
+  display:flex;align-items:center;gap:6px;padding:4px 6px;
+  background:var(--face);
+  box-shadow:inset 0 1px 0 var(--white), inset 0 2px 0 var(--light), 0 -1px 0 var(--black);
+}
+.start-btn{
+  display:flex;align-items:center;gap:9px;font-weight:bold;font-size:17px;
+  padding:6px 15px 6px 10px;border:none;background:var(--face);
+  box-shadow:inset -1px -1px 0 var(--black), inset 1px 1px 0 var(--white),
+             inset -2px -2px 0 var(--face-d), inset 2px 2px 0 var(--light);
+}
+.start-btn[aria-expanded="true"],.start-btn:active{
+  box-shadow:inset -1px -1px 0 var(--white), inset 1px 1px 0 var(--black),
+             inset -2px -2px 0 var(--light), inset 2px 2px 0 var(--face-d);
+}
+.tb-sep{width:2px;align-self:stretch;margin:2px 1px;
+  box-shadow:inset 1px 0 0 var(--face-d), inset -1px 0 0 var(--white);}
+.tb-tasks{display:flex;gap:5px;flex:1;min-width:0;overflow:hidden}
+.tb-task{
+  display:flex;align-items:center;gap:7px;
+  flex:0 1 220px;min-width:50px;padding:6px 13px;border:none;
+  background:var(--face);font-size:15.5px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  box-shadow:inset -1px -1px 0 var(--black), inset 1px 1px 0 var(--white),
+             inset -2px -2px 0 var(--face-d), inset 2px 2px 0 var(--light);
+}
+.tb-task svg{flex:0 0 auto}
+.tb-task span{overflow:hidden;text-overflow:ellipsis}
+.tb-task.active{
+  font-weight:bold;
+  background-image:conic-gradient(#cacaca 25%, #d6d6d6 25% 50%, #cacaca 50% 75%, #d6d6d6 75%);
+  background-size:4px 4px;
+  box-shadow:inset -1px -1px 0 var(--white), inset 1px 1px 0 var(--black),
+             inset -2px -2px 0 var(--light), inset 2px 2px 0 var(--face-d);
+}
+.tray{
+  display:flex;align-items:center;gap:11px;padding:6px 14px;font-size:15.5px;
+  box-shadow:inset 1px 1px 0 var(--face-d), inset -1px -1px 0 var(--white);
+}
+@media (max-width:950px){
+  .tb-task span{display:none}
+  .tb-task{flex:0 0 auto;padding:5px 9px}
+  .tray .tray-icon{display:none}
+}
+
+/* ---------- Start menu ---------- */
+.startmenu{
+  position:fixed;left:5px;bottom:calc(var(--taskbar-h) + 2px);z-index:70;
+  display:flex;width:312px;
+  background:var(--face);
+  box-shadow:inset -1px -1px 0 var(--black), inset 1px 1px 0 var(--white),
+             inset -2px -2px 0 var(--face-d), inset 2px 2px 0 var(--light),
+             3px 3px 0 rgba(0,0,0,.3);
+}
+.startmenu[hidden]{display:none}
+.sm-band{
+  flex:0 0 33px;background:linear-gradient(180deg,var(--title-b),var(--title-a));
+  color:#fff;display:flex;align-items:flex-end;justify-content:center;
+  padding:8px 0;
+}
+.sm-band b{
+  writing-mode:vertical-rl;transform:rotate(180deg);
+  font-size:19px;letter-spacing:2px;white-space:nowrap;
+}
+.sm-items{flex:1;display:flex;flex-direction:column;padding:5px 4px}
+.sm-items a,.sm-items button{
+  display:flex;align-items:center;gap:14px;padding:11px 13px;
+  font-size:16px;color:var(--black);text-decoration:none;border:none;
+  background:none;text-align:left;width:100%;
+}
+.sm-items a:hover,.sm-items button:hover,
+.sm-items a:focus-visible,.sm-items button:focus-visible{
+  background:var(--navy);color:#fff;
+}
+.sm-div{height:2px;margin:5px 8px;
+  box-shadow:inset 0 1px 0 var(--face-d), inset 0 -1px 0 var(--white);}
+
+/* ---------- Boot overlay ---------- */
+.boot{
+  position:fixed;inset:0;z-index:100;background:#000;
+  color:var(--term-green);font-family:var(--mono);
+  font-size:clamp(19px,2.75vw,25px);line-height:1.4;
+  padding:42px clamp(22px,5vw,75px) 88px;
+  text-shadow:0 0 6px rgba(51,255,85,.4);
+  background-image:repeating-linear-gradient(0deg, rgba(0,255,80,.03) 0 1px, transparent 1px 3px);
+  transition:opacity .4s;
+  overflow-y:auto;
+}
+.boot.hide{opacity:0;pointer-events:none}
+.boot pre{font-family:inherit;white-space:pre-wrap}
+.boot .boot-hint{
+  position:fixed;bottom:28px;left:0;right:0;text-align:center;
+  color:#3f7a4c;font-size:17px;
+}
+html:not(.js) .boot{display:none}
+
+/* language menu on boot screen */
+.lang-menu{max-width:700px}
+.lang-menu[hidden]{display:none}
+.lm-head{
+  margin:38px 0 18px;color:var(--amber);
+  text-shadow:0 0 7px rgba(255,176,0,.4);
+  font-size:.85em;letter-spacing:1px;
+}
+.lm-opts{display:flex;flex-direction:column;gap:2px}
+.lang-opt{
+  display:block;width:100%;text-align:left;
+  background:none;border:none;cursor:pointer;
+  font-family:var(--mono);font-size:inherit;line-height:1.4;
+  color:var(--term-green);padding:4px 10px;
+  text-shadow:inherit;
+}
+.lang-opt .lm-cursor{visibility:hidden}
+.lang-opt.sel{
+  background:var(--term-green);color:#02180a;text-shadow:none;
+}
+.lang-opt.sel .lm-cursor{visibility:visible}
+.lang-opt:focus-visible{outline:1px dotted var(--term-green);outline-offset:2px}
+.lm-hint{margin-top:22px;color:#3f7a4c;font-size:.72em;line-height:1.6}
+
+/* ---------- Overlays: shutdown + dialog ---------- */
+.shutdown{
+  position:fixed;inset:0;z-index:110;background:#000;cursor:pointer;
+  display:grid;place-items:center;text-align:center;padding:20px;
+}
+.shutdown[hidden]{display:none}
+.shutdown p{
+  font-family:var(--mono);color:var(--amber);
+  font-size:clamp(30px,5.6vw,52px);line-height:1.3;
+  text-shadow:0 0 10px rgba(255,176,0,.45);
+}
+.shutdown small{
+  display:block;margin-top:32px;color:#666;
+  font-family:var(--ui-font);font-size:16px;
+}
+.dlg-backdrop{
+  position:fixed;inset:0;z-index:120;background:rgba(0,0,0,.25);
+  display:grid;place-items:center;padding:18px;
+}
+.dlg-backdrop[hidden]{display:none}
+.dialog{width:min(500px,100%)}
+.dlg-body{display:flex;gap:19px;align-items:flex-start;padding:21px 19px}
+.dlg-body p{line-height:1.5;font-size:16px}
+.dlg-btns{display:flex;justify-content:center;gap:15px;padding:0 19px 20px}
+.dlg-btns .btn{min-width:110px;justify-content:center}
+
+/* ---------- icon sizing (125% readability pass) ---------- */
+.titlebar .t-icon{width:20px;height:20px}
+.fname svg{width:28px;height:28px}
+.btn svg{width:20px;height:20px}
+.c-row svg{width:21px;height:21px}
+.tb-task svg{width:19px;height:19px}
+.start-btn > svg{width:23px;height:23px}
+.tray-icon{width:18px;height:18px}
+.desk-icons svg{width:42px;height:42px}
+.sm-items svg{width:28px;height:28px}
+.dlg-body > svg{width:42px;height:42px}
+
+@media (max-width:900px){
+  .filerow{grid-template-columns:1fr;gap:3px;padding:11px 10px}
+  .fprice{text-align:left}
+  .fprice small{display:inline;margin-left:6px}
+  .hero-art{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- ======================= pixel icon sprite ======================= -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-computer" viewBox="0 0 16 16" shape-rendering="crispEdges">
+      <rect x="1" y="1" width="14" height="10" fill="#c0c0c0"/><rect x="1" y="1" width="14" height="1" fill="#fff"/>
+      <rect x="3" y="3" width="10" height="6" fill="#000"/><rect x="4" y="5" width="6" height="1" fill="#33ff55"/>
+      <rect x="4" y="7" width="3" height="1" fill="#33ff55"/><rect x="6" y="11" width="4" height="1" fill="#808080"/>
+      <rect x="4" y="12" width="8" height="2" fill="#c0c0c0"/><rect x="4" y="14" width="8" height="1" fill="#808080"/>
+    </symbol>
+    <symbol id="i-folder" viewBox="0 0 16 16" shape-rendering="crispEdges">
+      <rect x="1" y="3" width="6" height="2" fill="#e8a200"/><rect x="1" y="5" width="14" height="9" fill="#ffcc33"/>
+      <rect x="1" y="13" width="14" height="1" fill="#b37700"/><rect x="14" y="5" width="1" height="9" fill="#b37700"/>
+      <rect x="2" y="6" width="12" height="1" fill="#ffe08a"/>
+    </symbol>
+    <symbol id="i-floppy" viewBox="0 0 16 16" shape-rendering="crispEdges">
+      <rect x="1" y="1" width="14" height="14" fill="#000080"/><rect x="13" y="1" width="2" height="2" fill="#008080"/>
+      <rect x="4" y="1" width="8" height="6" fill="#c0c0c0"/><rect x="9" y="2" width="2" height="4" fill="#000080"/>
+      <rect x="3" y="9" width="10" height="6" fill="#fff"/><rect x="4" y="11" width="8" height="1" fill="#9a9a9a"/>
+      <rect x="4" y="13" width="8" height="1" fill="#9a9a9a"/>
+    </symbol>
+    <symbol id="i-wrench" viewBox="0 0 16 16" shape-rendering="crispEdges">
+      <rect x="10" y="1" width="4" height="2" fill="#9a9a9a"/><rect x="9" y="2" width="2" height="3" fill="#d6d6d6"/>
+      <rect x="13" y="3" width="2" height="2" fill="#9a9a9a"/><rect x="11" y="4" width="3" height="2" fill="#d6d6d6"/>
+      <rect x="9" y="5" width="3" height="3" fill="#9a9a9a"/><rect x="7" y="7" width="3" height="3" fill="#d6d6d6"/>
+      <rect x="5" y="9" width="3" height="3" fill="#9a9a9a"/><rect x="2" y="11" width="4" height="4" fill="#d6d6d6"/>
+      <rect x="2" y="11" width="1" height="4" fill="#fff"/><rect x="5" y="14" width="1" height="1" fill="#6e6e6e"/>
+    </symbol>
+    <symbol id="i-chip" viewBox="0 0 16 16" shape-rendering="crispEdges">
+      <rect x="4" y="1" width="1" height="2" fill="#9a9a9a"/><rect x="7" y="1" width="1" height="2" fill="#9a9a9a"/>
+      <rect x="10" y="1" width="1" height="2" fill="#9a9a9a"/><rect x="4" y="13" width="1" height="2" fill="#9a9a9a"/>
+      <rect x="7" y="13" width="1" height="2" fill="#9a9a9a"/><rect x="10" y="13" width="1" height="2" fill="#9a9a9a"/>
+      <rect x="1" y="4" width="2" height="1" fill="#9a9a9a"/><rect x="1" y="8" width="2" height="1" fill="#9a9a9a"/>
+      <rect x="13" y="4" width="2" height="1" fill="#9a9a9a"/><rect x="13" y="8" width="2" height="1" fill="#9a9a9a"/>
+      <rect x="3" y="3" width="10" height="10" fill="#0f5132"/><rect x="3" y="3" width="10" height="1" fill="#1c7a4c"/>
+      <rect x="5" y="5" width="6" height="6" fill="#000"/><rect x="6" y="6" width="2" height="2" fill="#33ff55"/>
+    </symbol>
+    <symbol id="i-shield" viewBox="0 0 16 16" shape-rendering="crispEdges">
+      <rect x="3" y="2" width="10" height="7" fill="#000080"/><rect x="4" y="9" width="8" height="2" fill="#000080"/>
+      <rect x="5" y="11" width="6" height="2" fill="#000080"/><rect x="7" y="13" width="2" height="1" fill="#000080"/>
+      <rect x="4" y="3" width="4" height="5" fill="#1084d0"/>
+      <rect x="6" y="7" width="1" height="2" fill="#fff"/><rect x="7" y="8" width="1" height="1" fill="#fff"/>
+      <rect x="8" y="5" width="1" height="3" fill="#fff"/><rect x="9" y="4" width="1" height="2" fill="#fff"/>
+    </symbol>
+    <symbol id="i-phone" viewBox="0 0 16 16" shape-rendering="crispEdges">
+      <rect x="4" y="1" width="8" height="14" fill="#1a1a1a"/><rect x="5" y="3" width="6" height="9" fill="#008080"/>
+      <rect x="5" y="3" width="6" height="1" fill="#33cccc"/><rect x="7" y="13" width="2" height="1" fill="#666"/>
+      <rect x="6" y="5" width="4" height="1" fill="#e0ffff"/><rect x="6" y="7" width="3" height="1" fill="#e0ffff"/>
+    </symbol>
+    <symbol id="i-drive" viewBox="0 0 16 16" shape-rendering="crispEdges">
+      <rect x="1" y="4" width="14" height="8" fill="#c0c0c0"/><rect x="1" y="4" width="14" height="1" fill="#fff"/>
+      <rect x="1" y="11" width="14" height="1" fill="#6e6e6e"/><rect x="3" y="7" width="7" height="2" fill="#333"/>
+      <rect x="12" y="9" width="2" height="1" fill="#33ff55"/>
+    </symbol>
+    <symbol id="i-net" viewBox="0 0 16 16" shape-rendering="crispEdges">
+      <rect x="1" y="2" width="6" height="5" fill="#c0c0c0"/><rect x="2" y="3" width="4" height="3" fill="#008080"/>
+      <rect x="9" y="9" width="6" height="5" fill="#c0c0c0"/><rect x="10" y="10" width="4" height="3" fill="#008080"/>
+      <rect x="4" y="7" width="1" height="2" fill="#000"/><rect x="4" y="9" width="8" height="1" fill="#000"/>
+      <rect x="11" y="7" width="1" height="2" fill="#000"/><rect x="11" y="6" width="1" height="1" fill="#000"/>
+    </symbol>
+    <symbol id="i-tower" viewBox="0 0 16 16" shape-rendering="crispEdges">
+      <rect x="4" y="1" width="8" height="14" fill="#c0c0c0"/><rect x="4" y="1" width="8" height="1" fill="#fff"/>
+      <rect x="11" y="1" width="1" height="14" fill="#6e6e6e"/><rect x="4" y="15" width="8" height="1" fill="#4d4d4d"/>
+      <rect x="6" y="3" width="4" height="1" fill="#333"/><rect x="6" y="5" width="4" height="1" fill="#333"/>
+      <rect x="6" y="12" width="2" height="1" fill="#33ff55"/>
+    </symbol>
+    <symbol id="i-mail" viewBox="0 0 16 16" shape-rendering="crispEdges">
+      <rect x="1" y="3" width="14" height="10" fill="#fff"/><rect x="1" y="3" width="14" height="1" fill="#9a9a9a"/>
+      <rect x="1" y="12" width="14" height="1" fill="#9a9a9a"/><rect x="1" y="3" width="1" height="10" fill="#9a9a9a"/>
+      <rect x="14" y="3" width="1" height="10" fill="#9a9a9a"/>
+      <rect x="2" y="4" width="2" height="1" fill="#000080"/><rect x="12" y="4" width="2" height="1" fill="#000080"/>
+      <rect x="4" y="5" width="2" height="1" fill="#000080"/><rect x="10" y="5" width="2" height="1" fill="#000080"/>
+      <rect x="6" y="6" width="4" height="1" fill="#000080"/>
+    </symbol>
+    <symbol id="i-warn" viewBox="0 0 16 16" shape-rendering="crispEdges">
+      <rect x="7" y="1" width="2" height="1" fill="#ffcc00"/><rect x="6" y="2" width="4" height="2" fill="#ffcc00"/>
+      <rect x="5" y="4" width="6" height="3" fill="#ffcc00"/><rect x="4" y="7" width="8" height="3" fill="#ffcc00"/>
+      <rect x="3" y="10" width="10" height="2" fill="#ffcc00"/><rect x="2" y="12" width="12" height="2" fill="#ffcc00"/>
+      <rect x="7" y="4" width="2" height="5" fill="#000"/><rect x="7" y="11" width="2" height="2" fill="#000"/>
+    </symbol>
+    <symbol id="i-run" viewBox="0 0 16 16" shape-rendering="crispEdges">
+      <rect x="2" y="2" width="12" height="12" fill="#008080"/><rect x="2" y="2" width="12" height="1" fill="#33cccc"/>
+      <rect x="5" y="5" width="2" height="6" fill="#fff"/><rect x="7" y="6" width="2" height="4" fill="#fff"/>
+      <rect x="9" y="7" width="2" height="2" fill="#fff"/>
+    </symbol>
+  </defs>
+</svg>
+
+<!-- ======================= boot screen ======================= -->
+<div class="boot" id="boot" aria-label="Boot screen">
+  <pre id="bootText"></pre>
+
+  <div class="lang-menu" id="langMenu" hidden>
+    <div class="lm-head">SELECT LANGUAGE · SPRACHE WÄHLEN · CHOISIR LA LANGUE · SCEGLI LA LINGUA</div>
+    <div class="lm-opts" role="listbox" aria-label="Language / Sprache / Langue / Lingua">
+      <button type="button" role="option" class="lang-opt" data-lang="en" aria-selected="false"><span class="lm-cursor">&gt;</span> [1] ENGLISH</button>
+      <button type="button" role="option" class="lang-opt" data-lang="de" aria-selected="false"><span class="lm-cursor">&gt;</span> [2] DEUTSCH</button>
+      <button type="button" role="option" class="lang-opt" data-lang="fr" aria-selected="false"><span class="lm-cursor">&gt;</span> [3] FRANÇAIS</button>
+      <button type="button" role="option" class="lang-opt" data-lang="it" aria-selected="false"><span class="lm-cursor">&gt;</span> [4] ITALIANO</button>
+    </div>
+    <div class="lm-hint">↑ / ↓ &nbsp;·&nbsp; [1]–[4] &nbsp;·&nbsp; ENTER<br>or click · oder klicken · ou cliquez · o clicca</div>
+  </div>
+
+  <div class="boot-hint" id="bootHint">— press any key to skip intro —</div>
+</div>
+
+<!-- ======================= desktop shortcut icons ======================= -->
+<nav class="desk-icons" aria-label="Desktop shortcuts">
+  <a href="#home"><svg width="34" height="34"><use href="#i-computer"/></svg><span data-i18n="dk_home">My Computer</span></a>
+  <a href="#services"><svg width="34" height="34"><use href="#i-folder"/></svg><span data-i18n="dk_services">Services</span></a>
+  <a href="#phones"><svg width="34" height="34"><use href="#i-phone"/></svg><span>degoogle.exe</span></a>
+  <a href="#contact"><svg width="34" height="34"><use href="#i-mail"/></svg><span data-i18n="dk_contact">Contact</span></a>
+</nav>
+
+<main>
+
+  <!-- ======================= HERO ======================= -->
+  <section class="window w-hero" id="home" aria-labelledby="hero-title">
+    <div class="titlebar">
+      <svg class="t-icon" width="16" height="16"><use href="#i-computer"/></svg>
+      <h1 id="hero-title" data-i18n="hero_h1">CTRL+ALT+REPAIR — Old-School IT Support</h1> <!-- EDIT ME: business name (also in translations at the bottom of the file) -->
+      <div class="win-controls">
+        <button type="button" aria-label="Minimize (decorative)"><svg viewBox="0 0 10 10"><rect x="1" y="7" width="7" height="2" fill="#000"/></svg></button>
+        <button type="button" aria-label="Maximize (decorative)"><svg viewBox="0 0 10 10"><rect x="1" y="1" width="8" height="8" fill="none" stroke="#000" stroke-width="1.6"/></svg></button>
+        <button type="button" class="win-close" aria-label="Close window"><svg viewBox="0 0 10 10"><path d="M1 1 L9 9 M9 1 L1 9" stroke="#000" stroke-width="1.8"/></svg></button>
+      </div>
+    </div>
+    <div class="win-body" style="padding:0">
+      <div class="term">
+        <div class="hero-grid">
+          <div class="hero-copy">
+            <div class="dim">C:\&gt; run REPAIR.EXE /now</div>
+            <p class="hero-title">CTRL+ALT<br>+REPAIR</p>
+            <p class="hero-sub" data-i18n-html="hero_sub">Old-school IT support. Modern problems.<br>
+            <span class="dim">One technician. No hotline. No hold music.</span></p>
+
+            <div class="diag" aria-label="Diagnosis list">
+              <div class="diag-row"><span class="lbl" data-i18n="d1">&gt; PC slow as hell?</span><span class="dots" aria-hidden="true"></span><span class="stat ok" data-i18n="fixable">[ FIXABLE ]</span></div>
+              <div class="diag-row"><span class="lbl" data-i18n="d2">&gt; Blue screens &amp; crashes?</span><span class="dots" aria-hidden="true"></span><span class="stat ok" data-i18n="fixable">[ FIXABLE ]</span></div>
+              <div class="diag-row"><span class="lbl" data-i18n="d3">&gt; Fans screaming for help?</span><span class="dots" aria-hidden="true"></span><span class="stat ok" data-i18n="fixable">[ FIXABLE ]</span></div>
+              <div class="diag-row"><span class="lbl" data-i18n="d4">&gt; Google reading your phone?</span><span class="dots" aria-hidden="true"></span><span class="stat ok" data-i18n="fixable">[ FIXABLE ]</span></div>
+            </div>
+
+            <div><span data-i18n-html="diag_final"><span class="amber">DIAGNOSIS:</span> You need a tech who remembers dial-up.</span><span class="caret" aria-hidden="true"></span></div>
+
+            <div class="hero-ctas">
+              <a class="btn primary" href="#contact"><svg width="16" height="16"><use href="#i-wrench"/></svg><span data-i18n="cta_book">Book a repair</span></a>
+              <a class="btn" href="#services"><svg width="16" height="16"><use href="#i-folder"/></svg><span data-i18n="cta_services">View services</span></a>
+            </div>
+          </div>
+          <pre class="hero-art" aria-hidden="true">
+  ______________
+ |  __________  |
+ | |          | |
+ | |  C:\>_   | |
+ | |          | |
+ | |__________| |
+ |______________|
+     _[_____]_
+ ___[_________]___
+(_________________)</pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= SERVICES ======================= -->
+  <section class="window w-services" id="services" aria-labelledby="services-title">
+    <div class="titlebar">
+      <svg class="t-icon" width="16" height="16"><use href="#i-folder"/></svg>
+      <h2 id="services-title" data-i18n="srv_title">C:\SERVICES\ — Exploring</h2>
+      <div class="win-controls">
+        <button type="button" aria-label="Minimize (decorative)"><svg viewBox="0 0 10 10"><rect x="1" y="7" width="7" height="2" fill="#000"/></svg></button>
+        <button type="button" aria-label="Maximize (decorative)"><svg viewBox="0 0 10 10"><rect x="1" y="1" width="8" height="8" fill="none" stroke="#000" stroke-width="1.6"/></svg></button>
+        <button type="button" class="win-close" aria-label="Close window"><svg viewBox="0 0 10 10"><path d="M1 1 L9 9 M9 1 L1 9" stroke="#000" stroke-width="1.8"/></svg></button>
+      </div>
+    </div>
+    <div class="menubar" aria-hidden="true"><span data-i18n-html="m_file"><u>F</u>ile</span><span data-i18n-html="m_edit"><u>E</u>dit</span><span data-i18n-html="m_view"><u>V</u>iew</span><span data-i18n-html="m_help"><u>H</u>elp</span></div>
+    <div class="addressbar"><span data-i18n="addr_label">Address</span><span class="path field-in">C:\SERVICES\</span></div>
+
+    <div class="filelist">
+      <!-- EDIT ME: prices are placeholders in CHF — change here AND in the translations at the bottom of the file -->
+      <div class="filerow">
+        <div class="fname"><svg width="22" height="22"><use href="#i-floppy"/></svg>REINSTALL_OS.EXE</div>
+        <div class="fdesc" data-i18n="s1">Fresh operating system install — Windows, Linux or macOS. Your files backed up, disk wiped, drivers &amp; updates sorted. The machine feels new again.</div>
+        <div class="fprice" data-i18n-html="p1">from CHF 89.–</div>
+      </div>
+      <div class="filerow">
+        <div class="fname"><svg width="22" height="22"><use href="#i-wrench"/></svg>TROUBLESHOOT.BAT</div>
+        <div class="fdesc" data-i18n="s2">Crashes, freezes, error messages, "it just does weird stuff." I find the actual cause and fix it — software or settings, no guessing games.</div>
+        <div class="fprice" data-i18n-html="p2">from CHF 49.–</div>
+      </div>
+      <div class="filerow">
+        <div class="fname"><svg width="22" height="22"><use href="#i-chip"/></svg>FIX_HARDWARE.SYS</div>
+        <div class="fdesc" data-i18n="s3">Dead drives, faulty RAM, dying power supplies, loud fans, cracked laptop screens. Diagnosed, replaced, cleaned, re-pasted.</div>
+        <div class="fprice" data-i18n-html="p3">from CHF 59.–<small>+ parts</small></div>
+      </div>
+      <div class="filerow">
+        <div class="fname"><svg width="22" height="22"><use href="#i-drive"/></svg>UPGRADE.EXE</div>
+        <div class="fdesc" data-i18n="s4">SSD and RAM upgrades that make an old machine fly. Also GPU swaps and storage expansions. Cheaper than a new PC, feels like one.</div>
+        <div class="fprice" data-i18n-html="p4">from CHF 69.–<small>+ parts</small></div>
+      </div>
+      <div class="filerow">
+        <div class="fname"><svg width="22" height="22"><use href="#i-shield"/></svg>VIRUS_B_GONE.COM</div>
+        <div class="fdesc" data-i18n="s5">Malware, adware, browser hijackers and mystery toolbars removed. Then sensible protection set up — the kind that doesn't slow you down.</div>
+        <div class="fprice" data-i18n-html="p5">from CHF 69.–</div>
+      </div>
+      <div class="filerow">
+        <div class="fname"><svg width="22" height="22"><use href="#i-floppy"/></svg>BACKUP_RESCUE.EXE</div>
+        <div class="fdesc" data-i18n="s6">Automatic backups set up properly, so disaster stays boring. Plus data recovery from drives that are on their way out.</div>
+        <div class="fprice" data-i18n-html="p6">from CHF 79.–</div>
+      </div>
+      <div class="filerow">
+        <div class="fname"><svg width="22" height="22"><use href="#i-net"/></svg>NETWORK.CFG</div>
+        <div class="fdesc" data-i18n="s7">Wi-Fi that reaches the whole place, routers configured right, printers that actually print. Yes — printers. I'm not scared of them.</div>
+        <div class="fprice" data-i18n-html="p7">from CHF 59.–</div>
+      </div>
+      <div class="filerow">
+        <div class="fname"><svg width="22" height="22"><use href="#i-tower"/></svg>PC_BUILD.EXE</div>
+        <div class="fdesc" data-i18n="s8">Custom PC builds for office or gaming — parts picked for your budget, assembled, cable-managed and stress-tested before handover.</div>
+        <div class="fprice" data-i18n-html="p8">from CHF 149.–<small>+ parts</small></div>
+      </div>
+    </div>
+
+    <div class="statusbar">
+      <div data-i18n="st_obj">8 object(s)</div>
+      <div data-i18n-html="st_free"><span class="blink">FREE</span>&nbsp;first diagnosis</div>
+      <div data-i18n="st_nofix">No fix → no fee</div>
+    </div>
+  </section>
+
+  <!-- ======================= PHONES ======================= -->
+  <section class="window w-phones" id="phones" aria-labelledby="phones-title">
+    <div class="titlebar">
+      <svg class="t-icon" width="16" height="16"><use href="#i-phone"/></svg>
+      <h2 id="phones-title" data-i18n="ph_title">DEGOOGLE.EXE — Privacy Phone Shop</h2>
+      <div class="win-controls">
+        <button type="button" aria-label="Minimize (decorative)"><svg viewBox="0 0 10 10"><rect x="1" y="7" width="7" height="2" fill="#000"/></svg></button>
+        <button type="button" aria-label="Maximize (decorative)"><svg viewBox="0 0 10 10"><rect x="1" y="1" width="8" height="8" fill="none" stroke="#000" stroke-width="1.6"/></svg></button>
+        <button type="button" class="win-close" aria-label="Close window"><svg viewBox="0 0 10 10"><path d="M1 1 L9 9 M9 1 L1 9" stroke="#000" stroke-width="1.8"/></svg></button>
+      </div>
+    </div>
+    <div class="win-body">
+      <div class="phones-grid">
+        <div class="phones-copy">
+          <h3 style="margin-top:0" data-i18n="ph_h_intro">Your phone doesn't need to report to Google.</h3>
+          <p data-i18n-html="ph_intro">I sell phones with <strong>GrapheneOS</strong> or <strong>CalyxOS</strong> pre-installed — private, secure operating systems without Google tracking baked in. Set up, tested and ready to use out of the box. Or bring your own compatible device and I'll flash it for you.</p>
+          <h3 data-i18n="ph_h_bench">Every phone leaves the bench with:</h3>
+          <ul class="checklist">
+            <li><span class="chk" aria-hidden="true">✓</span><span data-i18n="c1">OS installed with verified boot, bootloader re-locked</span></li>
+            <li><span class="chk" aria-hidden="true">✓</span><span data-i18n="c2">App stores that respect you (F-Droid, Aurora) pre-configured</span></li>
+            <li><span class="chk" aria-hidden="true">✓</span><span data-i18n="c3">Your essential apps set up — most Android apps just work</span></li>
+            <li><span class="chk" aria-hidden="true">✓</span><span data-i18n="c4">30-minute crash course so you're comfortable on day one</span></li>
+            <li><span class="chk" aria-hidden="true">✓</span><span data-i18n="c5">30 days of "wait, how do I…?" support included</span></li>
+          </ul>
+          <p class="compat" data-i18n="ph_compat">Compatible devices: mainly Google Pixel (6 or newer for GrapheneOS). Not sure about yours? Ask — flashing advice is free.</p>
+        </div>
+        <div class="offers">
+          <div class="offer best">
+            <div class="o-head"><span class="radio" aria-hidden="true"></span><strong>Pixel + GrapheneOS</strong><span class="tagchip" data-i18n="o_tag">MOST PICKED</span><span class="o-price" data-i18n="o1_price">from CHF 399.–</span></div>
+            <p data-i18n="o1_desc">Refurbished or new Pixel with GrapheneOS installed, hardened and ready. The gold standard for a private daily driver.</p>
+          </div>
+          <div class="offer">
+            <div class="o-head"><span class="radio" aria-hidden="true"></span><strong>Pixel + CalyxOS</strong><span class="o-price" data-i18n="o2_price">from CHF 379.–</span></div>
+            <p data-i18n="o2_desc">A gentler landing for switchers — privacy-first with familiar comforts like microG for app compatibility.</p>
+          </div>
+          <div class="offer">
+            <div class="o-head"><span class="radio" aria-hidden="true"></span><strong data-i18n="o3_name">Flash your own device</strong><span class="o-price">CHF 89.–</span></div>
+            <p data-i18n="o3_desc">You bring the phone, I do the surgery: backup, install, configure, hand back. Same checklist as above.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= README ======================= -->
+  <section class="window w-readme" id="about" aria-labelledby="readme-title">
+    <div class="titlebar">
+      <svg class="t-icon" width="16" height="16"><use href="#i-run"/></svg>
+      <h2 id="readme-title" data-i18n="rd_title">README.TXT — Notepad</h2>
+      <div class="win-controls">
+        <button type="button" aria-label="Minimize (decorative)"><svg viewBox="0 0 10 10"><rect x="1" y="7" width="7" height="2" fill="#000"/></svg></button>
+        <button type="button" aria-label="Maximize (decorative)"><svg viewBox="0 0 10 10"><rect x="1" y="1" width="8" height="8" fill="none" stroke="#000" stroke-width="1.6"/></svg></button>
+        <button type="button" class="win-close" aria-label="Close window"><svg viewBox="0 0 10 10"><path d="M1 1 L9 9 M9 1 L1 9" stroke="#000" stroke-width="1.8"/></svg></button>
+      </div>
+    </div>
+    <div class="menubar" aria-hidden="true"><span data-i18n-html="m_file"><u>F</u>ile</span><span data-i18n-html="m_edit"><u>E</u>dit</span><span data-i18n-html="m_search"><u>S</u>earch</span><span data-i18n-html="m_help"><u>H</u>elp</span></div>
+    <!-- EDIT ME: add your name/story in the README texts (all 4 languages, bottom of file) -->
+    <div class="win-body" style="padding:10px">
+      <div class="notepad">
+<pre data-i18n="readme">================= README.TXT =================
+
+WHO
+  One technician, not a call center.
+  Taking computers apart since the
+  beige-tower era. Still enjoying it.
+
+HOW THIS WORKS
+  1. Bring the machine in, or I come to you.
+  2. Free diagnosis: I tell you what's wrong
+     and what it costs. In plain language.
+  3. You say GO or NO. No fix, no fee.
+
+WHAT YOU WON'T GET HERE
+  - Hold music
+  - Ticket numbers
+  - Upselling stuff you don't need
+  - "Have you tried rebooting?"
+    ...okay. Maybe once. It works.
+
+==============================================
+Last modified: 2026 by C:\ADMIN</pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= CONTACT ======================= -->
+  <section class="window w-contact" id="contact" aria-labelledby="contact-title">
+    <div class="titlebar">
+      <svg class="t-icon" width="16" height="16"><use href="#i-mail"/></svg>
+      <h2 id="contact-title" data-i18n="ct_title">CONTACT.EXE — Get Support</h2>
+      <div class="win-controls">
+        <button type="button" aria-label="Minimize (decorative)"><svg viewBox="0 0 10 10"><rect x="1" y="7" width="7" height="2" fill="#000"/></svg></button>
+        <button type="button" aria-label="Maximize (decorative)"><svg viewBox="0 0 10 10"><rect x="1" y="1" width="8" height="8" fill="none" stroke="#000" stroke-width="1.6"/></svg></button>
+        <button type="button" class="win-close" aria-label="Close window"><svg viewBox="0 0 10 10"><path d="M1 1 L9 9 M9 1 L1 9" stroke="#000" stroke-width="1.8"/></svg></button>
+      </div>
+    </div>
+    <div class="win-body">
+      <div class="contact-grid">
+        <fieldset>
+          <legend data-i18n="leg_reach">Reach me</legend>
+          <!-- EDIT ME: real phone + email below (also update the tel:/mailto: links and translations) -->
+          <div class="c-row"><svg width="17" height="17"><use href="#i-phone"/></svg><span data-i18n-html="ct_phone">Phone / Signal: <a href="tel:+41000000000">+41 00 000 00 00</a></span></div>
+          <div class="c-row"><svg width="17" height="17"><use href="#i-mail"/></svg><span data-i18n-html="ct_mail">E-Mail: <a href="mailto:repair@your-domain.ch">repair@your-domain.ch</a></span></div>
+          <div class="c-row"><svg width="17" height="17"><use href="#i-run"/></svg><span data-i18n="ct_reply">Reply time: usually same day</span></div>
+        </fieldset>
+        <fieldset>
+          <legend data-i18n="leg_shop">Workshop</legend>
+          <!-- EDIT ME: your town / address / hours -->
+          <div class="c-row"><svg width="17" height="17"><use href="#i-computer"/></svg><span data-i18n-html="ct_area">Your Town + ~30 km around<br>Drop-off or house calls</span></div>
+          <div class="c-row"><svg width="17" height="17"><use href="#i-folder"/></svg><span data-i18n-html="ct_hours">Mon–Fri 09:00–18:30<br>Sat 10:00–16:00</span></div>
+        </fieldset>
+      </div>
+      <div class="contact-ctas">
+        <a class="btn primary" id="mailCta" href="mailto:repair@your-domain.ch?subject=My%20computer%20needs%20help"><svg width="16" height="16"><use href="#i-mail"/></svg><span data-i18n="cta_mail">Send E-Mail</span></a>
+        <a class="btn" href="tel:+41000000000"><svg width="16" height="16"><use href="#i-phone"/></svg><span data-i18n="cta_call">Call Now</span></a>
+      </div>
+      <p class="small-note" data-i18n="ct_note">Describe the problem in one sentence — "it's slow", "it beeps", "it smells weird" — all valid starting points.</p>
+    </div>
+  </section>
+
+  <!-- ======================= footer ======================= -->
+  <footer class="site-footer">
+    <div>
+      <span class="counter-label" data-i18n="ft_visitor">You are visitor No.</span><br>
+      <span class="counter" id="counter" aria-label="Visitor counter"></span>
+    </div>
+    <div data-i18n-html="ft_line">
+      Best viewed at 800×600 in 256 colors · © <span id="year">2026</span> CTRL+ALT+REPAIR<br>
+      Have you tried turning it off and on again?
+    </div>
+  </footer>
+</main>
+
+<!-- ======================= start menu ======================= -->
+<nav class="startmenu" id="startmenu" hidden aria-label="Start menu">
+  <div class="sm-band"><b>REPAIR95</b></div>
+  <div class="sm-items">
+    <a href="#home"><svg width="22" height="22"><use href="#i-computer"/></svg><span data-i18n="sm_home">Home</span></a>
+    <a href="#services"><svg width="22" height="22"><use href="#i-folder"/></svg><span data-i18n="sm_services">Services</span></a>
+    <a href="#phones"><svg width="22" height="22"><use href="#i-phone"/></svg><span data-i18n="sm_phones">Privacy Phones</span></a>
+    <a href="#about"><svg width="22" height="22"><use href="#i-run"/></svg><span>README.TXT</span></a>
+    <a href="#contact"><svg width="22" height="22"><use href="#i-mail"/></svg><span data-i18n="sm_contact">Contact</span></a>
+    <div class="sm-div" aria-hidden="true"></div>
+    <button type="button" id="shutdownBtn"><svg width="22" height="22"><use href="#i-warn"/></svg><span data-i18n="sm_shutdown">Shut Down…</span></button>
+  </div>
+</nav>
+
+<!-- ======================= taskbar ======================= -->
+<div class="taskbar">
+  <button type="button" class="start-btn" id="startBtn" aria-expanded="false" aria-controls="startmenu">
+    <svg width="18" height="18" viewBox="0 0 16 16" shape-rendering="crispEdges" aria-hidden="true">
+      <rect x="1" y="1" width="6" height="6" fill="#cc2200"/><rect x="9" y="1" width="6" height="6" fill="#00a800"/>
+      <rect x="1" y="9" width="6" height="6" fill="#0044cc"/><rect x="9" y="9" width="6" height="6" fill="#ffcc00"/>
+    </svg><span data-i18n="start_btn">Start</span>
+  </button>
+  <div class="tb-sep" aria-hidden="true"></div>
+  <nav class="tb-tasks" aria-label="Sections">
+    <button type="button" class="tb-task" data-target="home"><svg width="15" height="15"><use href="#i-computer"/></svg><span data-i18n="tb_home">Repair</span></button>
+    <button type="button" class="tb-task" data-target="services"><svg width="15" height="15"><use href="#i-folder"/></svg><span data-i18n="tb_services">Services</span></button>
+    <button type="button" class="tb-task" data-target="phones"><svg width="15" height="15"><use href="#i-phone"/></svg><span data-i18n="tb_phones">Phones</span></button>
+    <button type="button" class="tb-task" data-target="about"><svg width="15" height="15"><use href="#i-run"/></svg><span>README</span></button>
+    <button type="button" class="tb-task" data-target="contact"><svg width="15" height="15"><use href="#i-mail"/></svg><span data-i18n="tb_contact">Contact</span></button>
+  </nav>
+  <div class="tray">
+    <svg class="tray-icon" width="14" height="14" aria-hidden="true"><use href="#i-shield"/></svg>
+    <span id="clock" aria-label="Current time">--:--</span>
+  </div>
+</div>
+
+<!-- ======================= shutdown screen ======================= -->
+<div class="shutdown" id="shutdown" hidden role="button" tabindex="-1" aria-label="Click to return">
+  <div>
+    <p data-i18n-html="sd_main">It's now safe to turn off<br>your computer.</p>
+    <small data-i18n="sd_small">(…or click anywhere to keep browsing)</small>
+  </div>
+</div>
+
+<!-- ======================= error dialog ======================= -->
+<div class="dlg-backdrop" id="dlgBackdrop" hidden>
+  <div class="window dialog" role="alertdialog" aria-modal="true" aria-labelledby="dlgTitle" aria-describedby="dlgText">
+    <div class="titlebar">
+      <h2 id="dlgTitle" style="font-size:16px" data-i18n="dlg_title">System Message</h2>
+      <div class="win-controls">
+        <button type="button" class="dlg-close" aria-label="Close dialog"><svg viewBox="0 0 10 10" width="10" height="10"><path d="M1 1 L9 9 M9 1 L1 9" stroke="#000" stroke-width="1.8"/></svg></button>
+      </div>
+    </div>
+    <div class="dlg-body">
+      <svg width="34" height="34" aria-hidden="true"><use href="#i-warn"/></svg>
+      <p id="dlgText" data-i18n-html="dlg_text"><strong>ERROR 0x1998:</strong> This window is load-bearing.<br>Closing it may cause nostalgia leakage.</p>
+    </div>
+    <div class="dlg-btns">
+      <button type="button" class="btn dlg-close">OK</button>
+      <button type="button" class="btn dlg-close" data-i18n="dlg_ok2">Also OK</button>
+    </div>
+  </div>
+</div>
+
+<script>
+document.documentElement.classList.add('js');
+(function(){
+  var $ = function(s){ return document.querySelector(s); };
+  var $$ = function(s){ return Array.prototype.slice.call(document.querySelectorAll(s)); };
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ================================================================
+     TRANSLATIONS  (en / de / fr / it)
+     EDIT ME: business name, prices and README stories live in here too.
+     ================================================================ */
+  var I18N = {
+    en: {
+      doc_title: "CTRL+ALT+REPAIR — Old-School IT Support",
+      meta_desc: "Old-school IT support: OS reinstalls, troubleshooting, hardware repair, upgrades and de-googled privacy phones with GrapheneOS or CalyxOS.",
+      mail_subject: "My computer needs help"
+      /* English texts already live in the HTML itself */
+    },
+    de: {
+      doc_title: "CTRL+ALT+REPAIR — IT-Support der alten Schule",
+      meta_desc: "IT-Support der alten Schule: OS-Neuinstallationen, Fehlersuche, Hardware-Reparaturen, Upgrades und Google-freie Handys mit GrapheneOS oder CalyxOS.",
+      mail_subject: "Mein Computer braucht Hilfe",
+      dk_home: "Arbeitsplatz", dk_services: "Dienste", dk_contact: "Kontakt",
+      hero_h1: "CTRL+ALT+REPAIR — IT-Support der alten Schule",
+      hero_sub: "IT-Support der alten Schule. Moderne Probleme.<br><span class='dim'>Ein Techniker. Keine Hotline. Keine Warteschleife.</span>",
+      d1: "> PC langsam wie die Hölle?", d2: "> Bluescreens & Abstürze?", d3: "> Lüfter schreien um Hilfe?", d4: "> Google liest dein Handy mit?",
+      fixable: "[ LÖSBAR ]",
+      diag_final: "<span class='amber'>DIAGNOSE:</span> Du brauchst einen Techniker, der Modem-Zeiten noch kennt.",
+      cta_book: "Reparatur anfragen", cta_services: "Dienste ansehen",
+      srv_title: "C:\\SERVICES\\ — Durchsuchen",
+      m_file: "<u>D</u>atei", m_edit: "<u>B</u>earbeiten", m_view: "<u>A</u>nsicht", m_help: "<u>H</u>ilfe", m_search: "<u>S</u>uchen",
+      addr_label: "Adresse",
+      s1: "Frische Betriebssystem-Installation — Windows, Linux oder macOS. Deine Daten gesichert, Platte gewischt, Treiber & Updates erledigt. Fühlt sich an wie ein neuer Rechner.",
+      s2: "Abstürze, Freezes, Fehlermeldungen, «macht einfach komische Sachen». Ich finde die echte Ursache und behebe sie — Software oder Einstellungen, ohne Rumraten.",
+      s3: "Defekte Platten, kaputter RAM, sterbende Netzteile, laute Lüfter, gebrochene Laptop-Displays. Diagnostiziert, ersetzt, gereinigt, frische Wärmeleitpaste.",
+      s4: "SSD- und RAM-Upgrades, die alte Kisten fliegen lassen. Auch GPU-Tausch und mehr Speicher. Billiger als ein neuer PC, fühlt sich an wie einer.",
+      s5: "Malware, Adware, Browser-Hijacker und mysteriöse Toolbars entfernt. Danach vernünftiger Schutz — einer, der nicht ausbremst.",
+      s6: "Automatische Backups sauber eingerichtet, damit der Ernstfall langweilig bleibt. Plus Datenrettung von Platten auf dem letzten Loch.",
+      s7: "WLAN, das die ganze Wohnung erreicht, Router richtig konfiguriert, Drucker, die wirklich drucken. Ja — Drucker. Ich habe keine Angst vor ihnen.",
+      s8: "Individuelle PC-Builds für Büro oder Gaming — Teile passend zum Budget, sauber verkabelt und vor der Übergabe auf Herz und Nieren getestet.",
+      p1: "ab CHF 89.–", p2: "ab CHF 49.–", p3: "ab CHF 59.–<small>+ Teile</small>", p4: "ab CHF 69.–<small>+ Teile</small>",
+      p5: "ab CHF 69.–", p6: "ab CHF 79.–", p7: "ab CHF 59.–", p8: "ab CHF 149.–<small>+ Teile</small>",
+      st_obj: "8 Objekt(e)", st_free: "<span class='blink'>GRATIS</span>&nbsp;Erstdiagnose", st_nofix: "Keine Lösung → keine Kosten",
+      ph_title: "DEGOOGLE.EXE — Google-freie Handys",
+      ph_h_intro: "Dein Handy muss sich nicht bei Google melden.",
+      ph_intro: "Ich verkaufe Handys mit vorinstalliertem <strong>GrapheneOS</strong> oder <strong>CalyxOS</strong> — private, sichere Betriebssysteme ohne eingebautes Google-Tracking. Eingerichtet, getestet und sofort einsatzbereit. Oder du bringst dein eigenes kompatibles Gerät und ich flashe es für dich.",
+      ph_h_bench: "Jedes Handy verlässt die Werkbank mit:",
+      c1: "OS installiert mit Verified Boot, Bootloader wieder gesperrt",
+      c2: "App-Stores, die dich respektieren (F-Droid, Aurora), vorkonfiguriert",
+      c3: "Deine wichtigsten Apps eingerichtet — die meisten Android-Apps laufen einfach",
+      c4: "30-Minuten-Crashkurs, damit du dich ab Tag eins zurechtfindest",
+      c5: "30 Tage «Moment, wie ging das…?»-Support inklusive",
+      ph_compat: "Kompatible Geräte: hauptsächlich Google Pixel (ab Pixel 6 für GrapheneOS). Unsicher bei deinem? Frag einfach — Flash-Beratung ist gratis.",
+      o_tag: "MEISTGEWÄHLT",
+      o1_price: "ab CHF 399.–", o2_price: "ab CHF 379.–",
+      o1_desc: "Refurbished oder neues Pixel mit installiertem, gehärtetem GrapheneOS. Der Goldstandard für den privaten Alltag.",
+      o2_desc: "Der sanftere Umstieg — Privacy zuerst, mit vertrautem Komfort wie microG für App-Kompatibilität.",
+      o3_name: "Dein Gerät flashen",
+      o3_desc: "Du bringst das Handy, ich mache die OP: Backup, Installation, Einrichtung, Rückgabe. Gleiche Checkliste wie oben.",
+      rd_title: "README.TXT — Editor",
+      readme: "================= README.TXT =================\n\nWER\n  Ein Techniker, kein Callcenter.\n  Schraubt seit der Beige-Tower-Ära an\n  Computern. Macht immer noch Spass.\n\nSO LÄUFT'S\n  1. Bring die Kiste vorbei — oder ich\n     komme zu dir.\n  2. Gratis-Diagnose: Ich sage dir, was\n     kaputt ist und was es kostet.\n     In verständlicher Sprache.\n  3. Du sagst GO oder NO. Keine Lösung,\n     keine Kosten.\n\nWAS ES HIER NICHT GIBT\n  - Warteschleifenmusik\n  - Ticketnummern\n  - Verkauf von Zeug, das du nicht brauchst\n  - \"Schon mal neu gestartet?\"\n    ...okay. Einmal vielleicht. Hilft oft.\n\n==============================================\nZuletzt geändert: 2026 von C:\\ADMIN",
+      ct_title: "CONTACT.EXE — Support anfragen",
+      leg_reach: "So erreichst du mich", leg_shop: "Werkstatt",
+      ct_phone: "Telefon / Signal: <a href='tel:+41000000000'>+41 00 000 00 00</a>",
+      ct_mail: "E-Mail: <a href='mailto:repair@your-domain.ch'>repair@your-domain.ch</a>",
+      ct_reply: "Antwortzeit: meist am selben Tag",
+      ct_area: "Dein Ort + ~30 km Umkreis<br>Vorbeibringen oder Hausbesuch",
+      ct_hours: "Mo–Fr 09:00–18:30<br>Sa 10:00–16:00",
+      cta_mail: "E-Mail senden", cta_call: "Jetzt anrufen",
+      ct_note: "Beschreib das Problem in einem Satz — «ist langsam», «piept», «riecht komisch» — alles gültige Startpunkte.",
+      ft_visitor: "Du bist Besucher Nr.",
+      ft_line: "Optimiert für 800×600 bei 256 Farben · © <span id='year'>2026</span> CTRL+ALT+REPAIR<br>Hast du schon versucht, es aus- und wieder einzuschalten?",
+      sm_home: "Start", sm_services: "Dienste", sm_phones: "Google-freie Handys", sm_contact: "Kontakt", sm_shutdown: "Beenden…",
+      start_btn: "Start",
+      tb_home: "Reparatur", tb_services: "Dienste", tb_phones: "Handys", tb_contact: "Kontakt",
+      sd_main: "Sie können den Computer jetzt<br>ausschalten.",
+      sd_small: "(…oder irgendwo klicken und weitersurfen)",
+      dlg_title: "Systemmeldung",
+      dlg_text: "<strong>FEHLER 0x1998:</strong> Dieses Fenster ist tragend.<br>Schliessen kann zu Nostalgie-Austritt führen.",
+      dlg_ok2: "Auch OK"
+    },
+    fr: {
+      doc_title: "CTRL+ALT+REPAIR — Support informatique à l'ancienne",
+      meta_desc: "Support informatique à l'ancienne : réinstallation d'OS, dépannage, réparation matérielle, upgrades et téléphones sans Google avec GrapheneOS ou CalyxOS.",
+      mail_subject: "Mon ordinateur a besoin d'aide",
+      dk_home: "Poste de travail", dk_services: "Services", dk_contact: "Contact",
+      hero_h1: "CTRL+ALT+REPAIR — Support informatique à l'ancienne",
+      hero_sub: "Support informatique à l'ancienne. Problèmes modernes.<br><span class='dim'>Un seul technicien. Pas de hotline. Pas de musique d'attente.</span>",
+      d1: "> PC d'une lenteur infernale ?", d2: "> Écrans bleus et plantages ?", d3: "> Ventilateurs qui hurlent ?", d4: "> Google lit votre téléphone ?",
+      fixable: "[ RÉPARABLE ]",
+      diag_final: "<span class='amber'>DIAGNOSTIC :</span> Il vous faut un technicien qui a connu le 56k.",
+      cta_book: "Demander une réparation", cta_services: "Voir les services",
+      srv_title: "C:\\SERVICES\\ — Exploration",
+      m_file: "<u>F</u>ichier", m_edit: "<u>E</u>dition", m_view: "<u>A</u>ffichage", m_help: "<u>A</u>ide", m_search: "<u>R</u>echerche",
+      addr_label: "Adresse",
+      s1: "Réinstallation complète du système — Windows, Linux ou macOS. Vos fichiers sauvegardés, disque nettoyé, pilotes et mises à jour inclus. La machine repart comme neuve.",
+      s2: "Plantages, blocages, messages d'erreur, « il fait des trucs bizarres ». Je trouve la vraie cause et je la corrige — logiciel ou réglages, sans deviner.",
+      s3: "Disques morts, RAM défectueuse, alimentations en fin de vie, ventilateurs bruyants, écrans de portable fissurés. Diagnostiqué, remplacé, nettoyé, pâte thermique refaite.",
+      s4: "Upgrades SSD et RAM qui font décoller une vieille machine. Aussi changement de GPU et plus de stockage. Moins cher qu'un PC neuf, mêmes sensations.",
+      s5: "Malwares, adwares, navigateurs détournés et barres d'outils mystérieuses supprimés. Puis une protection sensée — qui ne ralentit pas la machine.",
+      s6: "Sauvegardes automatiques bien configurées, pour que la catastrophe reste ennuyeuse. Plus récupération de données sur disques mourants.",
+      s7: "Un Wi-Fi qui couvre tout, des routeurs bien configurés, des imprimantes qui impriment vraiment. Oui — des imprimantes. Elles ne me font pas peur.",
+      s8: "PC sur mesure pour le bureau ou le gaming — composants choisis selon votre budget, montés, câblés proprement et testés avant remise.",
+      p1: "dès CHF 89.–", p2: "dès CHF 49.–", p3: "dès CHF 59.–<small>+ pièces</small>", p4: "dès CHF 69.–<small>+ pièces</small>",
+      p5: "dès CHF 69.–", p6: "dès CHF 79.–", p7: "dès CHF 59.–", p8: "dès CHF 149.–<small>+ pièces</small>",
+      st_obj: "8 objet(s)", st_free: "Diagnostic initial <span class='blink'>GRATUIT</span>", st_nofix: "Pas réparé → pas payé",
+      ph_title: "DEGOOGLE.EXE — Téléphones sans Google",
+      ph_h_intro: "Votre téléphone n'a pas à rendre des comptes à Google.",
+      ph_intro: "Je vends des téléphones avec <strong>GrapheneOS</strong> ou <strong>CalyxOS</strong> préinstallé — des systèmes privés et sécurisés, sans pistage Google intégré. Configurés, testés, prêts à l'emploi. Ou apportez votre appareil compatible et je le flashe pour vous.",
+      ph_h_bench: "Chaque téléphone quitte l'atelier avec :",
+      c1: "OS installé avec verified boot, bootloader reverrouillé",
+      c2: "Des app stores qui vous respectent (F-Droid, Aurora), préconfigurés",
+      c3: "Vos applis essentielles installées — la plupart des applis Android fonctionnent",
+      c4: "Cours express de 30 minutes pour être à l'aise dès le premier jour",
+      c5: "30 jours de support « attends, comment on fait… ? » inclus",
+      ph_compat: "Appareils compatibles : principalement les Google Pixel (6 ou plus récent pour GrapheneOS). Un doute sur le vôtre ? Demandez — le conseil est gratuit.",
+      o_tag: "LE PLUS CHOISI",
+      o1_price: "dès CHF 399.–", o2_price: "dès CHF 379.–",
+      o1_desc: "Pixel reconditionné ou neuf avec GrapheneOS installé et durci. La référence pour un usage quotidien privé.",
+      o2_desc: "Une transition plus douce — la vie privée d'abord, avec des repères familiers comme microG pour la compatibilité des applis.",
+      o3_name: "Flasher votre appareil",
+      o3_desc: "Vous apportez le téléphone, je fais l'opération : sauvegarde, installation, configuration, restitution. Même checklist que ci-dessus.",
+      rd_title: "README.TXT — Bloc-notes",
+      readme: "================= README.TXT =================\n\nQUI\n  Un technicien, pas un centre d'appels.\n  Je démonte des ordinateurs depuis\n  l'époque des tours beiges. Toujours\n  avec plaisir.\n\nCOMMENT ÇA MARCHE\n  1. Apportez la machine, ou je me déplace.\n  2. Diagnostic gratuit : je vous dis ce\n     qui cloche et ce que ça coûte.\n     En langage clair.\n  3. Vous dites GO ou NO. Pas réparé,\n     pas payé.\n\nCE QUE VOUS NE TROUVEREZ PAS ICI\n  - Musique d'attente\n  - Numéros de ticket\n  - Vente de trucs inutiles\n  - « Vous avez essayé de redémarrer ? »\n    ...bon. Une fois, peut-être. Ça marche.\n\n==============================================\nDernière modification : 2026 par C:\\ADMIN",
+      ct_title: "CONTACT.EXE — Obtenir de l'aide",
+      leg_reach: "Me joindre", leg_shop: "Atelier",
+      ct_phone: "Téléphone / Signal : <a href='tel:+41000000000'>+41 00 000 00 00</a>",
+      ct_mail: "E-mail : <a href='mailto:repair@your-domain.ch'>repair@your-domain.ch</a>",
+      ct_reply: "Réponse : généralement le jour même",
+      ct_area: "Votre ville + ~30 km alentour<br>Dépôt ou déplacement à domicile",
+      ct_hours: "Lun–Ven 09:00–18:30<br>Sam 10:00–16:00",
+      cta_mail: "Envoyer un e-mail", cta_call: "Appeler",
+      ct_note: "Décrivez le problème en une phrase — « c'est lent », « ça bipe », « ça sent bizarre » — tout point de départ est valable.",
+      ft_visitor: "Vous êtes le visiteur n°",
+      ft_line: "Optimisé pour 800×600 en 256 couleurs · © <span id='year'>2026</span> CTRL+ALT+REPAIR<br>Avez-vous essayé de l'éteindre et de le rallumer ?",
+      sm_home: "Accueil", sm_services: "Services", sm_phones: "Téléphones sans Google", sm_contact: "Contact", sm_shutdown: "Arrêter…",
+      start_btn: "Démarrer",
+      tb_home: "Réparation", tb_services: "Services", tb_phones: "Téléphones", tb_contact: "Contact",
+      sd_main: "Vous pouvez maintenant éteindre<br>votre ordinateur en toute sécurité.",
+      sd_small: "(…ou cliquez n'importe où pour continuer)",
+      dlg_title: "Message système",
+      dlg_text: "<strong>ERREUR 0x1998 :</strong> Cette fenêtre est porteuse.<br>La fermer peut provoquer une fuite de nostalgie.",
+      dlg_ok2: "OK aussi"
+    },
+    it: {
+      doc_title: "CTRL+ALT+REPAIR — Assistenza IT vecchia scuola",
+      meta_desc: "Assistenza IT vecchia scuola: reinstallazione OS, risoluzione problemi, riparazioni hardware, upgrade e telefoni senza Google con GrapheneOS o CalyxOS.",
+      mail_subject: "Il mio computer ha bisogno di aiuto",
+      dk_home: "Risorse del computer", dk_services: "Servizi", dk_contact: "Contatti",
+      hero_h1: "CTRL+ALT+REPAIR — Assistenza IT vecchia scuola",
+      hero_sub: "Assistenza IT vecchia scuola. Problemi moderni.<br><span class='dim'>Un solo tecnico. Niente call center. Niente musichetta d'attesa.</span>",
+      d1: "> PC lento da morire?", d2: "> Schermate blu e crash?", d3: "> Ventole che urlano aiuto?", d4: "> Google ti legge il telefono?",
+      fixable: "[ RISOLVIBILE ]",
+      diag_final: "<span class='amber'>DIAGNOSI:</span> Ti serve un tecnico che si ricorda del modem 56k.",
+      cta_book: "Prenota una riparazione", cta_services: "Vedi i servizi",
+      srv_title: "C:\\SERVICES\\ — Esplora",
+      m_file: "<u>F</u>ile", m_edit: "<u>M</u>odifica", m_view: "<u>V</u>isualizza", m_help: "<u>G</u>uida", m_search: "<u>C</u>erca",
+      addr_label: "Indirizzo",
+      s1: "Installazione pulita del sistema operativo — Windows, Linux o macOS. File salvati, disco azzerato, driver e aggiornamenti a posto. Il PC torna come nuovo.",
+      s2: "Crash, blocchi, messaggi d'errore, «fa cose strane». Trovo la causa vera e la sistemo — software o impostazioni, senza tirare a indovinare.",
+      s3: "Dischi morti, RAM difettosa, alimentatori a fine vita, ventole rumorose, schermi rotti. Diagnosi, sostituzione, pulizia e pasta termica nuova.",
+      s4: "Upgrade SSD e RAM che fanno volare una macchina vecchia. Anche cambio GPU e più spazio. Costa meno di un PC nuovo, sembra nuovo.",
+      s5: "Malware, adware, browser dirottati e toolbar misteriose rimossi. Poi una protezione sensata — di quelle che non rallentano.",
+      s6: "Backup automatici configurati bene, così il disastro resta noioso. In più recupero dati da dischi ormai agli sgoccioli.",
+      s7: "Wi-Fi che copre tutta casa, router configurati come si deve, stampanti che stampano davvero. Sì — stampanti. Non mi fanno paura.",
+      s8: "PC su misura per ufficio o gaming — componenti scelti per il tuo budget, assemblati, cablati bene e stress-testati prima della consegna.",
+      p1: "da CHF 89.–", p2: "da CHF 49.–", p3: "da CHF 59.–<small>+ ricambi</small>", p4: "da CHF 69.–<small>+ ricambi</small>",
+      p5: "da CHF 69.–", p6: "da CHF 79.–", p7: "da CHF 59.–", p8: "da CHF 149.–<small>+ ricambi</small>",
+      st_obj: "8 oggetti", st_free: "Prima diagnosi <span class='blink'>GRATIS</span>", st_nofix: "Se non riparo, non paghi",
+      ph_title: "DEGOOGLE.EXE — Telefoni senza Google",
+      ph_h_intro: "Il tuo telefono non deve fare rapporto a Google.",
+      ph_intro: "Vendo telefoni con <strong>GrapheneOS</strong> o <strong>CalyxOS</strong> preinstallato — sistemi operativi privati e sicuri, senza tracciamento Google integrato. Configurati, testati e pronti all'uso. Oppure porti il tuo dispositivo compatibile e te lo flasho io.",
+      ph_h_bench: "Ogni telefono esce dal banco con:",
+      c1: "OS installato con verified boot, bootloader ribloccato",
+      c2: "App store che ti rispettano (F-Droid, Aurora) preconfigurati",
+      c3: "Le tue app essenziali configurate — quasi tutte le app Android funzionano",
+      c4: "Corso lampo di 30 minuti per partire tranquillo dal giorno uno",
+      c5: "30 giorni di supporto «aspetta, come si fa…?» inclusi",
+      ph_compat: "Dispositivi compatibili: principalmente Google Pixel (dal 6 in su per GrapheneOS). Dubbi sul tuo? Chiedi — la consulenza è gratis.",
+      o_tag: "IL PIÙ SCELTO",
+      o1_price: "da CHF 399.–", o2_price: "da CHF 379.–",
+      o1_desc: "Pixel ricondizionato o nuovo con GrapheneOS installato e blindato. Lo standard d'oro per l'uso quotidiano privato.",
+      o2_desc: "L'atterraggio morbido — privacy prima di tutto, con comodità familiari come microG per la compatibilità delle app.",
+      o3_name: "Flash del tuo dispositivo",
+      o3_desc: "Tu porti il telefono, io opero: backup, installazione, configurazione, riconsegna. Stessa checklist qui sopra.",
+      rd_title: "README.TXT — Blocco note",
+      readme: "================= README.TXT =================\n\nCHI\n  Un tecnico, non un call center.\n  Smonto computer dall'era dei tower\n  beige. E mi diverte ancora.\n\nCOME FUNZIONA\n  1. Porti la macchina, o vengo io da te.\n  2. Diagnosi gratuita: ti dico cosa c'è\n     che non va e quanto costa.\n     In parole semplici.\n  3. Tu dici GO o NO. Se non riparo,\n     non paghi.\n\nCOSA NON TROVERAI QUI\n  - Musichetta d'attesa\n  - Numeri di ticket\n  - Roba venduta che non ti serve\n  - \"Hai provato a riavviare?\"\n    ...ok. Una volta, forse. Spesso funziona.\n\n==============================================\nUltima modifica: 2026 da C:\\ADMIN",
+      ct_title: "CONTACT.EXE — Richiedi assistenza",
+      leg_reach: "Contattami", leg_shop: "Laboratorio",
+      ct_phone: "Telefono / Signal: <a href='tel:+41000000000'>+41 00 000 00 00</a>",
+      ct_mail: "E-mail: <a href='mailto:repair@your-domain.ch'>repair@your-domain.ch</a>",
+      ct_reply: "Risposta: di solito in giornata",
+      ct_area: "La tua città + ~30 km<br>Consegna in laboratorio o a domicilio",
+      ct_hours: "Lun–Ven 09:00–18:30<br>Sab 10:00–16:00",
+      cta_mail: "Invia e-mail", cta_call: "Chiama ora",
+      ct_note: "Descrivi il problema in una frase — «è lento», «fa bip», «puzza» — vanno tutte bene come inizio.",
+      ft_visitor: "Sei il visitatore n.",
+      ft_line: "Ottimizzato per 800×600 a 256 colori · © <span id='year'>2026</span> CTRL+ALT+REPAIR<br>Hai provato a spegnerlo e riaccenderlo?",
+      sm_home: "Home", sm_services: "Servizi", sm_phones: "Telefoni senza Google", sm_contact: "Contatti", sm_shutdown: "Arresta il sistema…",
+      start_btn: "Avvio",
+      tb_home: "Riparazioni", tb_services: "Servizi", tb_phones: "Telefoni", tb_contact: "Contatti",
+      sd_main: "Ora è possibile spegnere<br>il computer.",
+      sd_small: "(…o clicca ovunque per continuare)",
+      dlg_title: "Messaggio di sistema",
+      dlg_text: "<strong>ERRORE 0x1998:</strong> Questa finestra è portante.<br>Chiuderla può causare perdite di nostalgia.",
+      dlg_ok2: "Anche OK"
+    }
+  };
+
+  /* keep a pristine copy of the English strings from the HTML itself */
+  var EN_CACHE = {text:{}, html:{}};
+  $$('[data-i18n]').forEach(function(el){
+    var k = el.getAttribute('data-i18n');
+    if(!(k in EN_CACHE.text)) EN_CACHE.text[k] = el.textContent;
+  });
+  $$('[data-i18n-html]').forEach(function(el){
+    var k = el.getAttribute('data-i18n-html');
+    if(!(k in EN_CACHE.html)) EN_CACHE.html[k] = el.innerHTML;
+  });
+
+  var currentLang = 'en';
+  function applyLang(lang){
+    if(!I18N[lang]) lang = 'en';
+    currentLang = lang;
+    var dict = I18N[lang];
+    $$('[data-i18n]').forEach(function(el){
+      var k = el.getAttribute('data-i18n');
+      el.textContent = (lang !== 'en' && k in dict) ? dict[k] : EN_CACHE.text[k];
+    });
+    $$('[data-i18n-html]').forEach(function(el){
+      var k = el.getAttribute('data-i18n-html');
+      el.innerHTML = (lang !== 'en' && k in dict) ? dict[k] : EN_CACHE.html[k];
+    });
+    document.documentElement.lang = lang;
+    document.title = dict.doc_title || I18N.en.doc_title;
+    var md = document.getElementById('metaDesc');
+    if(md) md.setAttribute('content', dict.meta_desc || I18N.en.meta_desc);
+    var mc = document.getElementById('mailCta');
+    if(mc) mc.href = 'mailto:repair@your-domain.ch?subject=' +
+      encodeURIComponent(dict.mail_subject || I18N.en.mail_subject); /* EDIT ME: email address */
+    var y = document.getElementById('year');
+    if(y) y.textContent = new Date().getFullYear();
+    try{
+      var url = location.pathname + '?lang=' + lang + location.hash;
+      history.replaceState(null, '', url);
+    }catch(e){}
+  }
+
+  /* ---------- boot sequence + language selection ---------- */
+  var boot = $('#boot'), bootText = $('#bootText'),
+      bootHint = $('#bootHint'), langMenu = $('#langMenu');
+  var lines = [
+    'CTRL+ALT+REPAIR BIOS v4.86',
+    'Copyright (C) 1998-2026, Repair Systems Inc.',
+    '',
+    'CPU  : COFFEE-POWERED TECHNICIAN @ 3.5GHz ... OK',
+    'RAM  : 640K (SHOULD BE ENOUGH FOR ANYBODY) .. OK',
+    'HDD  : 20 YEARS OF EXPERIENCE ............... DETECTED',
+    'MOUSE ....... FOUND',
+    'PATIENCE .... UNLIMITED',
+    '',
+    'Loading language modules [EN|DE|FR|IT] ...... OK',
+    'Booting REPAIR-OS ........................... DONE',
+    ''
+  ];
+  var opts = $$('.lang-opt');
+  var selIdx = 0, typingDone = false, bootActive = !!boot;
+
+  /* preselect from ?lang= or the browser language */
+  (function(){
+    var m = /[?&]lang=(en|de|fr|it)/.exec(location.search);
+    var guess = m ? m[1] : (navigator.language || 'en').slice(0,2).toLowerCase();
+    var order = ['en','de','fr','it'];
+    var idx = order.indexOf(guess);
+    selIdx = idx >= 0 ? idx : 0;
+    if(m) applyLang(m[1]); /* shared link: page behind the boot screen is already translated */
+  })();
+
+  function highlight(i){
+    selIdx = (i + opts.length) % opts.length;
+    opts.forEach(function(o,n){
+      o.classList.toggle('sel', n === selIdx);
+      o.setAttribute('aria-selected', String(n === selIdx));
+    });
+  }
+  function showMenu(){
+    if(typingDone) return;
+    typingDone = true;
+    bootText.textContent = lines.join('\n');
+    langMenu.hidden = false;
+    bootHint.hidden = true;
+    highlight(selIdx);
+    opts[selIdx].focus();
+  }
+  function chooseLang(lang){
+    if(!bootActive) return;
+    bootActive = false;
+    applyLang(lang);
+    boot.classList.add('hide');
+    setTimeout(function(){
+      if(boot && boot.parentNode) boot.parentNode.removeChild(boot);
+      boot = null;
+    }, 450);
+    document.removeEventListener('keydown', bootKeys, true);
+  }
+  function bootKeys(e){
+    if(!bootActive) return;
+    if(!typingDone){ showMenu(); e.preventDefault(); return; }
+    var k = e.key;
+    if(k === 'ArrowDown'){ highlight(selIdx+1); opts[selIdx].focus(); e.preventDefault(); }
+    else if(k === 'ArrowUp'){ highlight(selIdx-1); opts[selIdx].focus(); e.preventDefault(); }
+    else if(k === 'Enter' || k === ' '){ chooseLang(opts[selIdx].dataset.lang); e.preventDefault(); }
+    else if(k >= '1' && k <= '4'){ var i = Number(k)-1; highlight(i); chooseLang(opts[i].dataset.lang); e.preventDefault(); }
+  }
+  if(boot){
+    opts.forEach(function(o,i){
+      o.addEventListener('click', function(){ highlight(i); chooseLang(o.dataset.lang); });
+      o.addEventListener('mouseenter', function(){ highlight(i); });
+    });
+    boot.addEventListener('click', function(e){
+      if(!typingDone) showMenu();
+    });
+    document.addEventListener('keydown', bootKeys, true);
+    if(reduced){ showMenu(); }
+    else{
+      var li = 0;
+      (function next(){
+        if(!boot || typingDone) return;
+        if(li < lines.length){
+          bootText.textContent += lines[li] + '\n';
+          var wait = lines[li].indexOf('...') !== -1 ? 380 : 190;
+          li++; setTimeout(next, wait);
+        } else { setTimeout(showMenu, 500); }
+      })();
+    }
+  }
+
+  /* ---------- clock ---------- */
+  var clock = $('#clock');
+  function tick(){
+    var d = new Date();
+    clock.textContent = ('0'+d.getHours()).slice(-2) + ':' + ('0'+d.getMinutes()).slice(-2);
+  }
+  tick(); setInterval(tick, 20000);
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  /* ---------- visitor counter (grows a little every day, like the old days) ---------- */
+  var days = Math.floor(Date.now() / 86400000) - 20470;
+  var n = String(133700 + days * 7 + new Date().getHours()).slice(-6);
+  $('#counter').innerHTML = n.split('').map(function(c){ return '<span>'+c+'</span>'; }).join('');
+
+  /* ---------- start menu ---------- */
+  var startBtn = $('#startBtn'), menu = $('#startmenu');
+  function closeMenu(){ menu.hidden = true; startBtn.setAttribute('aria-expanded','false'); }
+  startBtn.addEventListener('click', function(e){
+    e.stopPropagation();
+    var open = menu.hidden;
+    menu.hidden = !open;
+    startBtn.setAttribute('aria-expanded', String(open));
+  });
+  document.addEventListener('click', function(e){
+    if(!menu.hidden && !menu.contains(e.target) && e.target !== startBtn) closeMenu();
+  });
+  document.addEventListener('keydown', function(e){ if(e.key === 'Escape') closeMenu(); });
+  $$('.startmenu a').forEach(function(a){ a.addEventListener('click', closeMenu); });
+
+  /* ---------- shutdown ---------- */
+  var shutdown = $('#shutdown');
+  $('#shutdownBtn').addEventListener('click', function(){
+    closeMenu(); shutdown.hidden = false;
+  });
+  shutdown.addEventListener('click', function(){ shutdown.hidden = true; });
+  document.addEventListener('keydown', function(e){
+    if(!shutdown.hidden && (e.key === 'Escape' || e.key === 'Enter')) shutdown.hidden = true;
+  });
+
+  /* ---------- taskbar nav + active section ---------- */
+  $$('.tb-task').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var el = document.getElementById(btn.dataset.target);
+      if(el) el.scrollIntoView({behavior: reduced ? 'auto' : 'smooth'});
+    });
+  });
+  if('IntersectionObserver' in window){
+    var map = {};
+    $$('.tb-task').forEach(function(b){ map[b.dataset.target] = b; });
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(en){
+        if(en.isIntersecting){
+          $$('.tb-task').forEach(function(b){ b.classList.remove('active'); });
+          var b = map[en.target.id]; if(b) b.classList.add('active');
+        }
+      });
+    }, {rootMargin: '-35% 0px -55% 0px'});
+    ['home','services','phones','about','contact'].forEach(function(id){
+      var el = document.getElementById(id); if(el) io.observe(el);
+    });
+  }
+
+  /* ---------- fake close buttons -> error dialog ---------- */
+  var backdrop = $('#dlgBackdrop');
+  $$('.win-close').forEach(function(b){
+    b.addEventListener('click', function(){
+      backdrop.hidden = false;
+      var ok = backdrop.querySelector('.dlg-btns .btn'); if(ok) ok.focus();
+    });
+  });
+  function closeDlg(){ backdrop.hidden = true; }
+  $$('.dlg-close').forEach(function(b){ b.addEventListener('click', closeDlg); });
+  backdrop.addEventListener('click', function(e){ if(e.target === backdrop) closeDlg(); });
+  document.addEventListener('keydown', function(e){ if(e.key === 'Escape') closeDlg(); });
+})();
+</script>
+</body>
+</html>
